@@ -20,6 +20,13 @@ public class PickUp : MonoBehaviour
         GetComponent<Rigidbody>().velocity = Vector3.zero;
         GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
         GetComponent<Collider>().enabled = false;
+
+        foreach(Rigidbody rb in GetComponentsInParent<Rigidbody>())
+        {
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
         transform.position = dest.position;
 
         transform.parent = dest;
@@ -32,6 +39,7 @@ public class PickUp : MonoBehaviour
         GetComponent<Rigidbody>().isKinematic = false;
         FixedJoint fj = gameObject.AddComponent<FixedJoint>();
         fj.connectedBody = attachPoint.GetComponentInParent<Rigidbody>();
+        fj.enableCollision = true;
         GetComponent<Rigidbody>().velocity = Vector3.zero;
         GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
         transform.position = attachPoint.position;

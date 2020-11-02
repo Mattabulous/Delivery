@@ -24,6 +24,8 @@ public class PlayerInteraction : MonoBehaviour
 
     private float force = 4;
 
+    private bool toggledSnap;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -63,8 +65,6 @@ public class PlayerInteraction : MonoBehaviour
             if(Input.GetMouseButton(0))
             {
                 force += 3 * Time.deltaTime;
-
-                Debug.Log(force);
             }
 
             if(Input.GetMouseButtonUp(0))
@@ -121,7 +121,12 @@ public class PlayerInteraction : MonoBehaviour
             }
         }
 
-        if (Physics.Raycast(cam.transform.position, cam.transform.forward, out hit2, 5, boxSnap))
+        if(Input.GetMouseButtonDown(2))
+        {
+            toggledSnap = !toggledSnap;
+        }
+
+        if (Physics.Raycast(cam.transform.position, cam.transform.forward, out hit2, 5, boxSnap) && toggledSnap)
         {
             bool parentChecker;
             try
@@ -158,7 +163,7 @@ public class PlayerInteraction : MonoBehaviour
                 objectPickUp.DropObject();
                 objectGrabbed = false;
 
-                if(snapped != null)
+                if (snapped != null)
                 {
                     snapped.GetComponent<Collider>().enabled = false;
 
