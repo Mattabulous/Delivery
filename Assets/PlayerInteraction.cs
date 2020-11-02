@@ -22,6 +22,8 @@ public class PlayerInteraction : MonoBehaviour
 
     bool canE;
 
+    private float force = 2;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -57,6 +59,32 @@ public class PlayerInteraction : MonoBehaviour
             cZoom += (Input.mouseScrollDelta.y * 0.1f);
 
             pickUpPoint.localPosition = new Vector3(0, 0, cZoom);
+
+            if(Input.GetMouseButton(0))
+            {
+                force += 2 * Time.deltaTime;
+
+                Debug.Log(force);
+            }
+
+            if(Input.GetMouseButtonUp(0))
+            {
+                objectPickUp.ThrowObject(cam.transform.forward * force);
+                objectGrabbed = false;
+
+                force = 2;
+
+                if (objectPickUp.GetComponent<Box>())
+                {
+                    foreach (Transform child in objectPickUp.transform)
+                    {
+                        if (!child.GetComponentInChildren<PickUp>())
+                            child.gameObject.SetActive(true);
+                    }
+                }
+
+                objectPickUp = null;
+            }
         }
 
         RaycastHit hit;

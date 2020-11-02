@@ -11,6 +11,11 @@ public class PickUp : MonoBehaviour
     {
         destination = dest;
 
+        if(GetComponent<FixedJoint>())
+        {
+            Destroy(GetComponent<FixedJoint>());
+        }
+
         GetComponent<Rigidbody>().isKinematic = true;
         GetComponent<Rigidbody>().velocity = Vector3.zero;
         GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
@@ -24,7 +29,9 @@ public class PickUp : MonoBehaviour
     {
         destination = attachPoint;
 
-        GetComponent<Rigidbody>().isKinematic = true;
+        GetComponent<Rigidbody>().isKinematic = false;
+        FixedJoint fj = gameObject.AddComponent<FixedJoint>();
+        fj.connectedBody = attachPoint.GetComponentInParent<Rigidbody>();
         GetComponent<Rigidbody>().velocity = Vector3.zero;
         GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
         transform.position = attachPoint.position;
@@ -35,10 +42,21 @@ public class PickUp : MonoBehaviour
 
     public void DropObject()
     {
+        if (GetComponent<FixedJoint>())
+        {
+            Destroy(GetComponent<FixedJoint>());
+        }
+
         destination = null;
         GetComponent<Rigidbody>().isKinematic = false;
         GetComponent<Collider>().enabled = true;
 
         transform.parent = null;
+    }
+
+    public void ThrowObject(Vector3 forward)
+    {
+        DropObject();
+        GetComponent<Rigidbody>().AddForce(forward, ForceMode.Impulse);
     }
 }
