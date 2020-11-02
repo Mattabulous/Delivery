@@ -22,7 +22,7 @@ public class PlayerInteraction : MonoBehaviour
 
     bool canE;
 
-    private float force = 2;
+    private float force = 4;
 
     // Start is called before the first frame update
     void Start()
@@ -62,7 +62,7 @@ public class PlayerInteraction : MonoBehaviour
 
             if(Input.GetMouseButton(0))
             {
-                force += 2 * Time.deltaTime;
+                force += 3 * Time.deltaTime;
 
                 Debug.Log(force);
             }
@@ -72,7 +72,7 @@ public class PlayerInteraction : MonoBehaviour
                 objectPickUp.ThrowObject(cam.transform.forward * force);
                 objectGrabbed = false;
 
-                force = 2;
+                force = 4;
 
                 if (objectPickUp.GetComponent<Box>())
                 {

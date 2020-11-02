@@ -57,6 +57,6 @@ public class PickUp : MonoBehaviour
     public void ThrowObject(Vector3 forward)
     {
         DropObject();
-        GetComponent<Rigidbody>().AddForce(forward, ForceMode.Impulse);
+        GetComponent<Rigidbody>().AddForce(forward, ForceMode.VelocityChange);
     }
 }
