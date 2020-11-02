@@ -15,6 +15,9 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] LayerMask box;
     [SerializeField] LayerMask boxSnap;
 
+    [SerializeField] float maxZoom;
+    public float cZoom;
+
     float rotSpeed = 60;
 
     bool canE;
@@ -48,6 +51,12 @@ public class PlayerInteraction : MonoBehaviour
 
                 Cursor.lockState = CursorLockMode.Locked;
             }
+
+            cZoom = Mathf.Clamp(cZoom, 2.5f, maxZoom);
+
+            cZoom += (Input.mouseScrollDelta.y * 0.1f);
+
+            pickUpPoint.localPosition = new Vector3(0, 0, cZoom);
         }
 
         RaycastHit hit;
