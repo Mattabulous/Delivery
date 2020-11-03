@@ -351,6 +351,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destination: {fileID: 0}
+  attached: 0
+  rootObjectColour: {fileID: 2100000, guid: 486d2573bac1c2f49acd1a615743594a, type: 2}
 --- !u!114 &4280511838049060895
 MonoBehaviour:
   m_ObjectHideFlags: 0

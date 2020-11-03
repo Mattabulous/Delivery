@@ -135,7 +135,7 @@ public class PlayerInteraction : MonoBehaviour
             }
             catch (NullReferenceException e)
             {
-                parentChecker = true;
+                parentChecker = false;
             }
 
             if (objectGrabbed && parentChecker)
@@ -148,11 +148,11 @@ public class PlayerInteraction : MonoBehaviour
         }
         else
         {
+            snapped = null;
+
             if (objectPickUp != null)
             {
                 objectPickUp.transform.position = pickUpPoint.position;
-
-                snapped = null;
             }
         }
 
