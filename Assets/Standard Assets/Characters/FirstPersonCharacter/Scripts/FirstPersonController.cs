@@ -15,6 +15,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private float m_WalkSpeed;
         [SerializeField] private float m_RunSpeed;
         [SerializeField] [Range(0f, 1f)] private float m_RunstepLenghten;
+        [SerializeField] private float groundChecker;
+        [SerializeField] private LayerMask groundLayers;
         [SerializeField] private float m_JumpSpeed;
         [SerializeField] private float m_StickToGroundForce;
         [SerializeField] private float m_GravityMultiplier;
@@ -30,7 +32,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
 
         private Camera m_Camera;
-        private bool m_Jump;
+        private bool m_Jump = false;
         private float m_YRotation;
         private Vector2 m_Input;
         private Vector3 m_MoveDir = Vector3.zero;
@@ -66,12 +68,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             RotateView();
             // the jump state needs to read here to make sure it is not missed
-            /*if (!m_Jump)
+            if (!m_Jump)
             {
                 m_Jump = CrossPlatformInputManager.GetButtonDown("Jump");
             }
 
-            if (!m_PreviouslyGrounded && m_CharacterController.isGrounded)
+            /*if (!m_PreviouslyGrounded && m_CharacterController.isGrounded)
             {
                 StartCoroutine(m_JumpBob.DoBobCycle());
                 PlayLandingSound();
@@ -112,7 +114,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_MoveDir.z = desiredMove.z*speed;
 
 
-            if (m_CharacterController.isGrounded)
+            /*if (m_CharacterController.isGrounded)
             {
                 m_MoveDir.y = -m_StickToGroundForce;
 
@@ -127,7 +129,40 @@ namespace UnityStandardAssets.Characters.FirstPerson
             else
             {
                 m_MoveDir += Physics.gravity*m_GravityMultiplier*Time.fixedDeltaTime;
+            }*/
+
+            RaycastHit hit;
+            if(Physics.Raycast(transform.position, Vector3.down, out hit, groundChecker, groundLayers))
+            {
+                m_MoveDir.y = -m_StickToGroundForce;
+
+                if (m_Jump)
+                {
+                    if(hit.collider.CompareTag("Box"))
+                    {
+                        if(hit.collider.GetComponent<Rigidbody>().velocity.x <= 0.01f && hit.collider.GetComponent<Rigidbody>().velocity.y <= 0.01f
+                            && hit.collider.GetComponent<Rigidbody>().velocity.z <= 0.01f) 
+                        {
+                            m_Jump = false;
+                            PlayJumpSound();
+                            m_MoveDir.y = m_JumpSpeed;
+                        }
+                    }
+                    else
+                    {
+                        m_Jump = false;
+                        PlayJumpSound();
+                        m_MoveDir.y = m_JumpSpeed;
+                    }
+                }
             }
+            else
+            {
+                m_Jump = false;
+
+                m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
+            }
+
             m_CollisionFlags = m_CharacterController.Move(m_MoveDir*Time.fixedDeltaTime);
 
             ProgressStepCycle(speed);
