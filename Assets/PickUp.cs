@@ -53,7 +53,7 @@ public class PickUp : MonoBehaviour
 
         transform.position = dest.position;
 
-        if(transform.parent != null && transform.parent.parent.CompareTag("Box"))
+        if(transform.parent != null && transform.parent.parent != null && transform.parent.parent.CompareTag("Box"))
         {
             transform.parent.parent.GetComponent<MeshRenderer>().material = transform.parent.parent.GetComponent<PickUp>().cMaterial;
             GetComponent<MeshRenderer>().material = rootObjectColour;
