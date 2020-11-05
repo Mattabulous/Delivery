@@ -133,24 +133,31 @@ public class PlayerInteraction : MonoBehaviour
             toggledSnap = !toggledSnap;
         }
 
-        if (Physics.Raycast(cam.transform.position, cam.transform.forward, out hit2, 5, boxSnap) && toggledSnap)
+        if (Physics.Raycast(cam.transform.position, cam.transform.forward, out hit2, 5, boxSnap) && toggledSnap && objectPickUp != null)
         {
-            bool parentChecker;
-            try
+            if (hit2.collider.GetComponentInParent<Box>().boxName == objectPickUp.GetComponent<Box>().boxName)
             {
-                parentChecker = hit2.collider.transform.root != objectPickUp.transform.root;
-            }
-            catch (NullReferenceException e)
-            {
-                parentChecker = false;
-            }
+                bool parentChecker;
+                try
+                {
+                    parentChecker = hit2.collider.transform.root != objectPickUp.transform.root;
+                }
+                catch (NullReferenceException e)
+                {
+                    parentChecker = false;
+                }
 
-            if (objectGrabbed && parentChecker)
-            {
-                objectPickUp.transform.position = hit2.collider.transform.position;
-                objectPickUp.transform.rotation = hit2.collider.transform.rotation;
+                if (objectGrabbed && parentChecker)
+                {
+                    objectPickUp.transform.position = hit2.collider.transform.position;
+                    objectPickUp.transform.rotation = hit2.collider.transform.rotation;
 
-                snapped = hit2.collider.transform;
+                    snapped = hit2.collider.transform;
+                }
+            }
+            else
+            {
+                snapped = null;
             }
         }
         else

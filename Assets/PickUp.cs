@@ -14,11 +14,9 @@ public class PickUp : MonoBehaviour
     [Header("Trajectory")]
     private float trajectoryVertDist = 0.25f;
     private LineRenderer line;
-    [SerializeField]
-    private Transform lineIntersect;
-
-    [SerializeField]
-    private float maxCurveLength = 5;
+    [SerializeField] private Transform lineIntersect;
+    [SerializeField] private float maxCurveLength = 5;
+    [SerializeField] LayerMask trajectoryLayers;
 
     private void Start()
     {
@@ -91,11 +89,13 @@ public class PickUp : MonoBehaviour
                 if(!setRoot)
                 {
                     t.GetComponent<MeshRenderer>().material = rootObjectColour;
+                    t.GetComponent<PickUp>().beforeMaterial = rootObjectColour;
                     setRoot = true;
                 }
                 else
                 {
                     t.GetComponent<MeshRenderer>().material = cMaterial;
+                    t.GetComponent<PickUp>().beforeMaterial = null;
                 }
             }
         }
@@ -121,6 +121,7 @@ public class PickUp : MonoBehaviour
 
         GetComponent<Rigidbody>().isKinematic = false;
         GetComponent<Collider>().enabled = true;
+
         if (beforeMaterial != null)
             GetComponent<MeshRenderer>().material = beforeMaterial;
         else
@@ -148,7 +149,7 @@ public class PickUp : MonoBehaviour
         RaycastHit hit;
         Ray ray = new Ray(currentPosition, currentVelocity.normalized);
 
-        while (!Physics.Raycast(ray, out hit, trajectoryVertDist) && Vector3.Distance(startPos, currentPosition) < maxCurveLength)
+        while (!Physics.Raycast(ray, out hit, trajectoryVertDist, trajectoryLayers) && Vector3.Distance(startPos, currentPosition) < maxCurveLength)
         {
             var t = trajectoryVertDist / currentVelocity.magnitude;
 

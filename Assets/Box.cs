@@ -4,4 +4,6 @@ using UnityEngine;
 
 public class Box : MonoBehaviour
 {
+    public bool isGoal;
+    public string boxName;
 }

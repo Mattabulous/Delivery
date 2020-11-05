@@ -5,12 +5,19 @@ using UnityEngine.Events;
 
 public class PressurePlate : MonoBehaviour
 {
+    [SerializeField] Material pressed;
+    private Material material;
     public bool gravOn;
     public LayerMask lm;
     public UnityEvent enterFunction;
     public UnityEvent exitFunction;
     private bool hasCalledEnter;
     private bool hasCalledExit = true;
+
+    private void Start()
+    {
+        material = GetComponent<MeshRenderer>().material;
+    }
 
     private void Update()
     {
@@ -23,6 +30,7 @@ public class PressurePlate : MonoBehaviour
             if(!hasCalledExit)
             {
                 exitFunction.Invoke();
+                GetComponent<MeshRenderer>().material = material;
                 hasCalledExit = true;
             }
         }
@@ -43,6 +51,7 @@ public class PressurePlate : MonoBehaviour
     {
         if(collision.collider.CompareTag("Box"))
         {
+            GetComponent<MeshRenderer>().material = pressed;
             gravOn = true;
             hasCalledExit = false;
         }
