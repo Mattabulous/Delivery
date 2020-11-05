@@ -7,8 +7,10 @@ public class PressurePlate : MonoBehaviour
 {
     public bool gravOn;
     public LayerMask lm;
-    public UnityEvent function;
-    private bool hasCalled;
+    public UnityEvent enterFunction;
+    public UnityEvent exitFunction;
+    private bool hasCalledEnter;
+    private bool hasCalledExit = true;
 
     private void Update()
     {
@@ -16,17 +18,23 @@ public class PressurePlate : MonoBehaviour
         if (!Physics.SphereCast(transform.position, 1f, Vector3.up, out hit, lm))
         {
             gravOn = false;
-            hasCalled = false;
+            hasCalledEnter = false;
+
+            if(!hasCalledExit)
+            {
+                exitFunction.Invoke();
+                hasCalledExit = true;
+            }
         }
 
         if (!gravOn)
             GetComponent<Rigidbody>().AddForce(Vector3.up * 9.81f, ForceMode.Acceleration);
         else
         {
-            if(!hasCalled)
+            if(!hasCalledEnter)
             {
-                function.Invoke();
-                hasCalled = true;
+                enterFunction.Invoke();
+                hasCalledEnter = true;
             } 
         }
     }
@@ -36,11 +44,17 @@ public class PressurePlate : MonoBehaviour
         if(collision.collider.CompareTag("Box"))
         {
             gravOn = true;
+            hasCalledExit = false;
         }
     }
 
     public void CallFunction()
     {
         Debug.Log("TESTING");
+    }
+
+    public void ToggleActive(GameObject go)
+    {
+        go.SetActive(!go.activeSelf);
     }
 }

@@ -8,10 +8,24 @@ public class PickUp : MonoBehaviour
     public bool attached;
     public Material rootObjectColour;
     public Material cMaterial;
+    public Material beforeMaterial;
+    public Material pickedUpObject;
+
+    [Header("Trajectory")]
+    private float trajectoryVertDist = 0.25f;
+    private LineRenderer line;
+    [SerializeField]
+    private Transform lineIntersect;
+
+    [SerializeField]
+    private float maxCurveLength = 5;
 
     private void Start()
     {
+        lineIntersect.transform.parent = null;
+        lineIntersect.gameObject.SetActive(false);
         cMaterial = GetComponent<Renderer>().material;
+        line = GetComponent<LineRenderer>();
     }
 
     public void PickUpObject(Transform dest)
@@ -45,7 +59,10 @@ public class PickUp : MonoBehaviour
         {
             transform.parent.parent.GetComponent<MeshRenderer>().material = transform.parent.parent.GetComponent<PickUp>().cMaterial;
             GetComponent<MeshRenderer>().material = rootObjectColour;
+            beforeMaterial = rootObjectColour;
         }
+
+        GetComponent<MeshRenderer>().material = pickedUpObject;
 
         transform.parent = dest;
     }
@@ -104,6 +121,10 @@ public class PickUp : MonoBehaviour
 
         GetComponent<Rigidbody>().isKinematic = false;
         GetComponent<Collider>().enabled = true;
+        if (beforeMaterial != null)
+            GetComponent<MeshRenderer>().material = beforeMaterial;
+        else
+            GetComponent<MeshRenderer>().material = cMaterial;
 
         transform.parent = null;
     }
@@ -111,6 +132,49 @@ public class PickUp : MonoBehaviour
     public void ThrowObject(Vector3 forward)
     {
         DropObject();
+        ClearTrajectory();
         GetComponent<Rigidbody>().AddForce(forward, ForceMode.VelocityChange);
+    }
+
+    public void DrawTrajectory(Vector3 startPos, Vector3 cVelocity)
+    {
+        lineIntersect.gameObject.SetActive(true);
+        var curvePoints = new List<Vector3>();
+        curvePoints.Add(startPos);
+
+        var currentPosition = startPos;
+        var currentVelocity = cVelocity;
+
+        RaycastHit hit;
+        Ray ray = new Ray(currentPosition, currentVelocity.normalized);
+
+        while (!Physics.Raycast(ray, out hit, trajectoryVertDist) && Vector3.Distance(startPos, currentPosition) < maxCurveLength)
+        {
+            var t = trajectoryVertDist / currentVelocity.magnitude;
+
+            currentVelocity = currentVelocity + t * Physics.gravity;
+
+            currentPosition = currentPosition + t * currentVelocity;
+
+            curvePoints.Add(currentPosition);
+
+            ray = new Ray(currentPosition, currentVelocity.normalized);
+
+            lineIntersect.transform.position = currentPosition;
+
+            if (hit.transform)
+            {
+                curvePoints.Add(hit.point);
+            }
+
+            line.positionCount = curvePoints.Count;
+            line.SetPositions(curvePoints.ToArray());
+        }
+    }
+
+    private void ClearTrajectory()
+    {
+        lineIntersect.gameObject.SetActive(false);
+        line.positionCount = 0;
     }
 }

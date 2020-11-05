@@ -60,11 +60,13 @@ public class PlayerInteraction : MonoBehaviour
 
             cZoom += (Input.mouseScrollDelta.y * 0.1f);
 
-            pickUpPoint.localPosition = new Vector3(0, 0, cZoom);
+            pickUpPoint.localPosition = new Vector3(0, pickUpPoint.localPosition.y, cZoom);
 
             if(Input.GetMouseButton(0))
             {
                 force += 3 * Time.deltaTime;
+
+                objectPickUp.DrawTrajectory(pickUpPoint.transform.position, cam.transform.forward * force);
             }
 
             if(Input.GetMouseButtonUp(0))
