@@ -178,4 +178,16 @@ public class PickUp : MonoBehaviour
         lineIntersect.gameObject.SetActive(false);
         line.positionCount = 0;
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.transform.CompareTag("StickyWall") && destination == null)
+        {
+            GetComponent<Rigidbody>().isKinematic = true;
+            GetComponent<Rigidbody>().velocity = Vector3.zero;
+            GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+
+            transform.rotation = Quaternion.identity;
+        }
+    }
 }
