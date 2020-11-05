@@ -14,6 +14,7 @@ public class PlayerInteraction : MonoBehaviour
     public PickUp objectPickUp;
     [SerializeField] LayerMask box;
     [SerializeField] LayerMask boxSnap;
+    [SerializeField] Transform trailStart;
 
     [SerializeField] float maxZoom;
     public float cZoom;
@@ -64,6 +65,8 @@ public class PlayerInteraction : MonoBehaviour
 
             if(Input.GetMouseButton(0))
             {
+                trailStart.gameObject.SetActive(true);
+
                 force += 3 * Time.deltaTime;
 
                 objectPickUp.DrawTrajectory(pickUpPoint.transform.position, cam.transform.forward * force);
@@ -71,6 +74,8 @@ public class PlayerInteraction : MonoBehaviour
 
             if(Input.GetMouseButtonUp(0))
             {
+                trailStart.gameObject.SetActive(false);
+
                 objectPickUp.ThrowObject(cam.transform.forward * force);
                 objectGrabbed = false;
 
