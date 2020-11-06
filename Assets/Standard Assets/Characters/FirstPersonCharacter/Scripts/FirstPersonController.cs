@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
 using Random = UnityEngine.Random;
@@ -12,8 +11,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
     [RequireComponent(typeof (AudioSource))]
     public class FirstPersonController : MonoBehaviour
     {
-        public PlayerInput pi;
-
         [SerializeField] private bool m_IsWalking;
         [SerializeField] private float m_WalkSpeed;
         [SerializeField] private float m_RunSpeed;
@@ -50,18 +47,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         public bool canMoveCam = true;
 
-        private Vector2 moveVector;
-        private float gravityX;
-        private float gravityY;
-
-        private float inputAccel = 6f;
-        private float inputDecel = 6f;
-
         // Use this for initialization
         private void Start()
         {
-            pi = GetComponent<PlayerInput>();
-
             m_CharacterController = GetComponent<CharacterController>();
             m_Camera = Camera.main;
             m_OriginalCameraPosition = m_Camera.transform.localPosition;
@@ -82,7 +70,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             // the jump state needs to read here to make sure it is not missed
             if (!m_Jump)
             {
-                m_Jump = pi.actions.FindAction("Jump").triggered;
+                m_Jump = CrossPlatformInputManager.GetButtonDown("Jump");
             }
 
             /*if (!m_PreviouslyGrounded && m_CharacterController.isGrounded)
@@ -255,29 +243,16 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private void GetInput(out float speed)
         {
             // Read input
-
-            moveVector = new Vector2(pi.actions.FindAction("LR").ReadValue<float>(), pi.actions.FindAction("BF").ReadValue<float>());
-
-            if (moveVector.x == 0)
-            {
-                gravityX = Mathf.MoveTowards(gravityX, 0f, Time.deltaTime * inputDecel);
-            }
-            else
-                gravityX = Mathf.MoveTowards(gravityX, moveVector.x, Time.deltaTime * inputAccel);
-
-            if (moveVector.y == 0)
-                gravityY = Mathf.MoveTowards(gravityY, 0f, Time.deltaTime * inputDecel);
-            else
-                gravityY = Mathf.MoveTowards(gravityY, moveVector.y, Time.deltaTime * inputAccel);
-
-            gravityX = Mathf.Clamp(gravityX, -1, 1);
-            gravityY = Mathf.Clamp(gravityY, -1, 1);
-
-            float horizontal = gravityX;
-            float vertical = gravityY;
+            float horizontal = CrossPlatformInputManager.GetAxis("Horizontal");
+            float vertical = CrossPlatformInputManager.GetAxis("Vertical");
 
             bool waswalking = m_IsWalking;
 
+#if !MOBILE_INPUT
+            // On standalone builds, walk/run speed is modified by a key press.
+            // keep track of whether or not the character is walking or running
+            m_IsWalking = !Input.GetKey(KeyCode.LeftShift);
+#endif
             // set the desired speed to be walking or running
             speed = m_IsWalking ? m_WalkSpeed : m_RunSpeed;
             m_Input = new Vector2(horizontal, vertical);

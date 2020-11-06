@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityStandardAssets.CrossPlatformInput;
 
 namespace UnityStandardAssets.Characters.FirstPerson
@@ -8,8 +7,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
     [Serializable]
     public class MouseLook
     {
-        public PlayerInput input;
-
         public float XSensitivity = 2f;
         public float YSensitivity = 2f;
         public bool clampVerticalRotation = true;
@@ -37,8 +34,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             if(canMove)
             {
-                float yRot = input.actions.FindAction("RotX").ReadValue<float>() * XSensitivity;
-                float xRot = input.actions.FindAction("RotY").ReadValue<float>() * YSensitivity;
+                float yRot = CrossPlatformInputManager.GetAxis("Mouse X") * XSensitivity;
+                float xRot = CrossPlatformInputManager.GetAxis("Mouse Y") * YSensitivity;
 
                 m_CharacterTargetRot *= Quaternion.Euler(0f, yRot, 0f);
                 m_CameraTargetRot *= Quaternion.Euler(-xRot, 0f, 0f);
@@ -82,14 +79,14 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void InternalLockUpdate()
         {
-            /*if(Input.GetKeyUp(KeyCode.Escape))
+            if(Input.GetKeyUp(KeyCode.Escape))
             {
                 m_cursorIsLocked = false;
             }
             else if(Input.GetMouseButtonUp(0))
             {
                 m_cursorIsLocked = true;
-            }*/
+            }
 
             if (m_cursorIsLocked)
             {
