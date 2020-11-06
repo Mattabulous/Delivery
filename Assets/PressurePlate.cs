@@ -22,12 +22,12 @@ public class PressurePlate : MonoBehaviour
     private void Update()
     {
         RaycastHit hit;
-        if (!Physics.SphereCast(transform.position, 1f, Vector3.up, out hit, lm))
+        if (!Physics.SphereCast(transform.position, 1f, new Vector3(0, 0.1f, 0), out hit, lm))
         {
             gravOn = false;
             hasCalledEnter = false;
 
-            if(!hasCalledExit)
+            if (!hasCalledExit)
             {
                 exitFunction.Invoke();
                 GetComponent<MeshRenderer>().material = material;
@@ -65,5 +65,10 @@ public class PressurePlate : MonoBehaviour
     public void ToggleActive(GameObject go)
     {
         go.SetActive(!go.activeSelf);
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(transform.position, 1f);
     }
 }
