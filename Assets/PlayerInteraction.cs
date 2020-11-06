@@ -2,11 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering.HighDefinition;
 using UnityStandardAssets.Characters.FirstPerson;
 
 public class PlayerInteraction : MonoBehaviour
 {
+    public PlayerInput pi;
+
     [SerializeField] Camera cam;
     [SerializeField] Transform pickUpPoint;
     private bool objectGrabbed;
@@ -31,6 +34,45 @@ public class PlayerInteraction : MonoBehaviour
     void Start()
     {
         cam = Camera.main;
+
+        pi.actions.FindAction("Throw").started += delegate { OnThrowStarted(); };
+        pi.actions.FindAction("Throw").canceled += delegate { OnThrowRelease(); };
+        pi.actions.FindAction("SnapToggle").performed += delegate { OnSnap(); };
+    }
+
+    void OnThrowStarted()
+    {
+        trailStart.gameObject.SetActive(true);
+
+        force += 3 * Time.deltaTime;
+
+        objectPickUp.DrawTrajectory(pickUpPoint.transform.position, cam.transform.forward * force);
+    }
+
+    void OnThrowRelease()
+    {
+        trailStart.gameObject.SetActive(false);
+
+        objectPickUp.ThrowObject(cam.transform.forward * force);
+        objectGrabbed = false;
+
+        force = 4;
+
+        if (objectPickUp.GetComponent<Box>())
+        {
+            foreach (Transform child in objectPickUp.transform)
+            {
+                if (!child.GetComponentInChildren<PickUp>())
+                    child.gameObject.SetActive(true);
+            }
+        }
+
+        objectPickUp = null;
+    }
+
+    void OnSnap()
+    {
+        toggledSnap = !toggledSnap;
     }
 
     // Update is called once per frame
@@ -38,14 +80,14 @@ public class PlayerInteraction : MonoBehaviour
     {
         if(objectPickUp != null)
         {
-            if(Input.GetKey(KeyCode.R))
+            if(pi.actions.FindAction("Rotate").ReadValue<bool>())
             {
                 MouseLook.canMove = false;
 
                 Cursor.lockState = CursorLockMode.Confined;
 
-                float rotX = Input.GetAxis("Mouse X") * rotSpeed * Mathf.Deg2Rad;
-                float rotY = Input.GetAxis("Mouse Y") * rotSpeed * Mathf.Deg2Rad;
+                float rotX = pi.actions.FindAction("RotX").ReadValue<float>() * rotSpeed * Mathf.Deg2Rad;
+                float rotY = pi.actions.FindAction("RotY").ReadValue<float>() * rotSpeed * Mathf.Deg2Rad;
 
                 objectPickUp.transform.Rotate(Vector3.up, -rotX);
                 objectPickUp.transform.Rotate(Vector3.right, rotY);
@@ -59,39 +101,9 @@ public class PlayerInteraction : MonoBehaviour
 
             cZoom = Mathf.Clamp(cZoom, 2.5f, maxZoom);
 
-            cZoom += (Input.mouseScrollDelta.y * 0.1f);
+            cZoom += (pi.actions.FindAction("Scroll").ReadValue<float>() * 0.1f);
 
             pickUpPoint.localPosition = new Vector3(0, pickUpPoint.localPosition.y, cZoom);
-
-            if(Input.GetMouseButton(0))
-            {
-                trailStart.gameObject.SetActive(true);
-
-                force += 3 * Time.deltaTime;
-
-                objectPickUp.DrawTrajectory(pickUpPoint.transform.position, cam.transform.forward * force);
-            }
-
-            if(Input.GetMouseButtonUp(0))
-            {
-                trailStart.gameObject.SetActive(false);
-
-                objectPickUp.ThrowObject(cam.transform.forward * force);
-                objectGrabbed = false;
-
-                force = 4;
-
-                if (objectPickUp.GetComponent<Box>())
-                {
-                    foreach (Transform child in objectPickUp.transform)
-                    {
-                        if (!child.GetComponentInChildren<PickUp>())
-                            child.gameObject.SetActive(true);
-                    }
-                }
-
-                objectPickUp = null;
-            }
         }
 
         RaycastHit hit;
@@ -100,7 +112,7 @@ public class PlayerInteraction : MonoBehaviour
         {
             if(hit.collider.GetComponent<PickUp>())
             {
-                if(Input.GetKeyDown(KeyCode.E) && !objectGrabbed)
+                if(pi.actions.FindAction("PickUp").triggered && !objectGrabbed)
                 {
                     canE = false;
                     StartCoroutine(ECooldown());
@@ -126,11 +138,6 @@ public class PlayerInteraction : MonoBehaviour
                     }
                 }
             }
-        }
-
-        if(Input.GetMouseButtonDown(2))
-        {
-            toggledSnap = !toggledSnap;
         }
 
         if (Physics.Raycast(cam.transform.position, cam.transform.forward, out hit2, 5, boxSnap) && toggledSnap && objectPickUp != null)
@@ -172,7 +179,7 @@ public class PlayerInteraction : MonoBehaviour
 
         if (objectGrabbed)
         {
-            if(Input.GetKeyDown(KeyCode.E) && canE)
+            if(pi.actions.FindAction("Place").triggered && canE)
             {
                 objectPickUp.DropObject();
                 objectGrabbed = false;
