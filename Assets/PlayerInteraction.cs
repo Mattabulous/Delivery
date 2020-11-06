@@ -30,18 +30,23 @@ public class PlayerInteraction : MonoBehaviour
 
     private bool toggledSnap;
 
+    private bool throwing;
+
     // Start is called before the first frame update
     void Start()
     {
         cam = Camera.main;
 
         pi.actions.FindAction("Throw").started += delegate { OnThrowStarted(); };
+        
         pi.actions.FindAction("Throw").canceled += delegate { OnThrowRelease(); };
         pi.actions.FindAction("SnapToggle").performed += delegate { OnSnap(); };
     }
 
     void OnThrowStarted()
     {
+        throwing =
+
         trailStart.gameObject.SetActive(true);
 
         force += 3 * Time.deltaTime;
@@ -205,6 +210,8 @@ public class PlayerInteraction : MonoBehaviour
 
                 objectPickUp = null;
             }
+
+            
         }
     }
 

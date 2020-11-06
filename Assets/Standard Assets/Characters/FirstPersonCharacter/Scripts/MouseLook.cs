@@ -23,6 +23,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private Quaternion m_CharacterTargetRot;
         private Quaternion m_CameraTargetRot;
         private bool m_cursorIsLocked = true;
+        private Vector2 moveVector;
+        private float gravityX;
+        private float inputDecel = 6f;
+        private float inputAccel = 6f;
+        private float gravityY;
 
         public void Init(Transform character, Transform camera)
         {
@@ -37,8 +42,33 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             if(canMove)
             {
-                float yRot = input.actions.FindAction("RotX").ReadValue<float>() * XSensitivity;
-                float xRot = input.actions.FindAction("RotY").ReadValue<float>() * YSensitivity;
+                if(input.currentControlScheme != "KB/M")
+                {
+                    moveVector = new Vector2(input.actions.FindAction("RotX").ReadValue<float>(), input.actions.FindAction("RotY").ReadValue<float>());
+
+                    if (moveVector.x == 0)
+                    {
+                        gravityX = Mathf.MoveTowards(gravityX, 0f, Time.deltaTime * inputDecel);
+                    }
+                    else
+                        gravityX = Mathf.MoveTowards(gravityX, moveVector.x, Time.deltaTime * inputAccel);
+
+                    if (moveVector.y == 0)
+                        gravityY = Mathf.MoveTowards(gravityY, 0f, Time.deltaTime * inputDecel);
+                    else
+                        gravityY = Mathf.MoveTowards(gravityY, moveVector.y, Time.deltaTime * inputAccel);
+
+                    gravityX = Mathf.Clamp(gravityX, -1, 1);
+                    gravityY = Mathf.Clamp(gravityY, -1, 1);
+                }
+                else
+                {
+                    gravityX = input.actions.FindAction("RotX").ReadValue<float>();
+                    gravityY = input.actions.FindAction("RotY").ReadValue<float>();
+                }
+
+                float yRot = gravityX * XSensitivity;
+                float xRot = gravityY * YSensitivity;
 
                 m_CharacterTargetRot *= Quaternion.Euler(0f, yRot, 0f);
                 m_CameraTargetRot *= Quaternion.Euler(-xRot, 0f, 0f);
