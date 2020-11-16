@@ -98,7 +98,7 @@ public class PlayerInteraction : MonoBehaviour
         RaycastHit hit2;
         if (Physics.Raycast(cam.transform.position, cam.transform.forward, out hit, 5, box))
         {
-            if(hit.collider.GetComponent<PickUp>())
+            if(hit.collider.GetComponent<PickUp>().enabled)
             {
                 if(Input.GetKeyDown(KeyCode.E) && !objectGrabbed)
                 {
@@ -135,7 +135,7 @@ public class PlayerInteraction : MonoBehaviour
 
         if (Physics.Raycast(cam.transform.position, cam.transform.forward, out hit2, 5, boxSnap) && toggledSnap && objectPickUp != null)
         {
-            if (hit2.collider.GetComponentInParent<Box>().boxName == objectPickUp.GetComponent<Box>().boxName)
+            if (!hit2.collider.GetComponent<BoxCheck>() && hit2.collider.GetComponentInParent<Box>().boxName == objectPickUp.GetComponent<Box>().boxName)
             {
                 bool parentChecker;
                 try
@@ -154,6 +154,13 @@ public class PlayerInteraction : MonoBehaviour
 
                     snapped = hit2.collider.transform;
                 }
+            }
+            else if (hit2.collider.GetComponent<BoxCheck>())
+            {
+                objectPickUp.transform.position = hit2.collider.transform.position;
+                objectPickUp.transform.rotation = hit2.collider.transform.rotation;
+
+                snapped = hit2.collider.transform;
             }
             else
             {
@@ -179,12 +186,20 @@ public class PlayerInteraction : MonoBehaviour
 
                 if (snapped != null)
                 {
-                    snapped.GetComponent<Collider>().enabled = false;
+                    if(!snapped.GetComponent<BoxCheck>())
+                    {
+                        snapped.GetComponent<Collider>().enabled = false;
 
-                    objectPickUp.AttachObject(snapped);
-                    objectPickUp.attached = true;
+                        objectPickUp.AttachObject(snapped);
+                        objectPickUp.attached = true;
 
-                    snapped = null;
+                        snapped = null;
+                    }
+                    else
+                    {
+                        snapped.GetComponent<BoxCheck>().BoxEnter(objectPickUp.transform);
+                        snapped = null;
+                    }
                 }
 
                 if (objectPickUp.GetComponent<Box>())
